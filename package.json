@@ -1,0 +1,28 @@
+{
+  "name": "zenakari",
+  "version": "1.0.0",
+  "description": "ZenAkari: Calm, meditative Japanese Light Up (Akari / 美術館) lantern illumination logic puzzle",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "node --test test/engine.test.js",
+    "build": "node scripts/build.js"
+  },
+  "keywords": [
+    "akari",
+    "lightup",
+    "bijutsukan",
+    "logic-puzzle",
+    "nikoli",
+    "zen",
+    "pwa",
+    "capacitor",
+    "offline-game"
+  ],
+  "author": "OfferPk",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  }
+}

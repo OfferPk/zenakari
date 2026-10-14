@@ -1,0 +1,6 @@
+{
+  "appId": "pk.offer.zenakari",
+  "appName": "ZenAkari",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
