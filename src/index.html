@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ZenAkari - Lantern Light Logic</title>
   <meta name="description" content="Calm, meditative Japanese Light Up (Akari / 美術館) lantern illumination logic puzzle with soothing procedural garden acoustics.">
   <meta name="theme-color" content="#0a0f18">
@@ -33,7 +33,7 @@
         <span id="pack-name" class="pack-name">Twilight Courtyard</span>
         <span id="level-name" class="level-name">Level 1 (5×5)</span>
       </div>
-      <div class="level-stats">
+      <div class="level-stats" aria-live="polite" aria-atomic="true">
         <div class="stat-item">
           <span class="stat-label">Unlit</span>
           <span id="stat-unlit" class="stat-value">0</span>
@@ -48,20 +48,22 @@
     <!-- Board Viewport -->
     <div class="board-viewport">
       <div class="board-container">
-        <svg id="board-svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+        <svg id="board-svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"
+             role="group" aria-label="Puzzle board" aria-describedby="board-instructions">
           <!-- Dynamic rendering from app.js -->
         </svg>
       </div>
+      <p id="board-instructions" class="sr-only">Use Tab to focus an open pathway cell, then press Enter or Space to place or remove a lantern or dot.</p>
     </div>
 
     <!-- Controls Bar -->
-    <div class="controls-bar">
+    <div class="controls-bar" role="group" aria-label="Puzzle actions">
       <button id="btn-undo" class="action-btn" title="Undo Move">
         <span class="btn-icon">⤺</span>
         <span class="btn-label">Undo</span>
       </button>
 
-      <button id="btn-mode" class="action-btn active" title="Toggle Lantern / Dot Mode">
+      <button id="btn-mode" class="action-btn active" title="Toggle Lantern / Dot Mode" aria-label="Cell placement mode: lantern" aria-pressed="true">
         <span id="mode-icon" class="btn-icon">🏮</span>
         <span id="mode-label" class="btn-label">Lantern</span>
       </button>
