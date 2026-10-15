@@ -77,6 +77,8 @@
 
   function updateSoundButton() {
     btnSound.textContent = audio.enabled ? '🔊' : '🔇';
+    btnSound.setAttribute('aria-label', audio.enabled ? 'Mute sound' : 'Enable sound');
+    btnSound.setAttribute('aria-pressed', String(audio.enabled));
   }
 
   // Load specific level
@@ -104,7 +106,7 @@
   }
 
   // Handle cell click
-  function handleCellClick(r, c, forceDot = false) {
+  function handleCellClick(r, c, forceDot = false, restoreFocus = false) {
     if (engine.isWall(r, c)) return;
 
     pushUndo();
@@ -132,6 +134,9 @@
     }
 
     renderBoard();
+    if (restoreFocus) {
+      boardSvg.querySelector(`[data-r="${r}"][data-c="${c}"]`)?.focus();
+    }
     checkVictory();
   }
 
@@ -164,6 +169,8 @@
 
     statUnlitEl.textContent = illum.unlitCells;
     statLanternsEl.textContent = illum.lanternsCount;
+    btnUndo.disabled = undoStack.length === 0;
+    boardSvg.setAttribute('aria-label', `${lvl.pack}, ${lvl.name}, ${W} by ${H} puzzle board`);
 
     let svgHtml = '';
 
@@ -251,12 +258,19 @@
           const isLit = illum.litCount[r][c] > 0;
           const bgFill = isLit ? 'rgba(245, 158, 11, 0.18)' : 'url(#cell-grad)';
           const borderStroke = isLit ? 'rgba(251, 191, 36, 0.4)' : '#334155';
+          const cellContents = engine.grid[r][c];
+          const cellState = cellContents === 'lantern' ? 'Lantern' : cellContents === 'dot' ? 'Dot marker' : 'Empty pathway';
+          const lightState = isLit ? 'lit' : 'unlit';
+          const conflictState = illum.conflicts.has(`${r},${c}`) ? ' Lantern sightline conflict.' : '';
+          const ariaAttrs = cellContents === 'empty'
+            ? `role="button" tabindex="0" aria-label="Row ${r + 1}, column ${c + 1}: ${cellState}, ${lightState}.${conflictState} Press Enter or Space to change."`
+            : 'aria-hidden="true"';
 
           svgHtml += `
             <rect class="path-cell" data-r="${r}" data-c="${c}"
                   x="${x + 1}" y="${y + 1}" width="${cellW - 2}" height="${cellH - 2}" rx="6"
                   fill="${bgFill}" stroke="${borderStroke}" stroke-width="1.5"
-                  style="cursor: pointer;" />
+                  style="cursor: pointer;" ${ariaAttrs} />
           `;
         }
       }
@@ -290,7 +304,8 @@
           const glowR = Math.min(cellW, cellH) * 0.42;
 
           svgHtml += `
-            <g class="lantern-item" data-r="${r}" data-c="${c}" style="cursor: pointer;">
+            <g class="lantern-item" data-r="${r}" data-c="${c}" style="cursor: pointer;"
+               role="button" tabindex="0" aria-label="Row ${r + 1}, column ${c + 1}: Lantern, ${illum.litCount[r][c] > 0 ? 'lit' : 'unlit'}.${isConflict ? ' Lantern sightline conflict.' : ''} Press Enter or Space to change.">
               <!-- Outer Glow Aura -->
               <circle cx="${cx}" cy="${cy}" r="${glowR}" fill="${glowGrad}" />
               <!-- Pagoda Lantern Icon -->
@@ -307,7 +322,8 @@
           svgHtml += `</g>`;
         } else if (cell === 'dot') {
           svgHtml += `
-            <g class="dot-item" data-r="${r}" data-c="${c}" style="cursor: pointer;">
+            <g class="dot-item" data-r="${r}" data-c="${c}" style="cursor: pointer;"
+               role="button" tabindex="0" aria-label="Row ${r + 1}, column ${c + 1}: Dot marker, ${illum.litCount[r][c] > 0 ? 'lit' : 'unlit'}. Press Enter or Space to change.">
               <circle cx="${cx}" cy="${cy}" r="${Math.min(cellW, cellH) * 0.12}"
                       fill="#94a3b8" opacity="0.75" pointer-events="none" />
             </g>
@@ -332,10 +348,19 @@
 
     // Attach click listeners to SVG elements
     boardSvg.querySelectorAll('.path-cell, .lantern-item, .dot-item').forEach(el => {
-      el.addEventListener('click', (e) => {
+      el.addEventListener('click', () => {
         const r = parseInt(el.getAttribute('data-r'), 10);
         const c = parseInt(el.getAttribute('data-c'), 10);
         handleCellClick(r, c, false);
+      });
+
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const r = parseInt(el.getAttribute('data-r'), 10);
+          const c = parseInt(el.getAttribute('data-c'), 10);
+          handleCellClick(r, c, false, true);
+        }
       });
 
       // Context menu / right click to place dot
@@ -373,6 +398,8 @@
       modeIcon.textContent = activeMode === 'lantern' ? '🏮' : '•';
       modeLabel.textContent = activeMode === 'lantern' ? 'Lantern' : 'Dot';
       btnMode.classList.toggle('active', activeMode === 'lantern');
+      btnMode.setAttribute('aria-pressed', String(activeMode === 'lantern'));
+      btnMode.setAttribute('aria-label', `Cell placement mode: ${activeMode}`);
       audio.playTap();
     });
 
